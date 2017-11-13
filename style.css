@@ -1,0 +1,32 @@
+body {
+    background-color: grey;
+}
+#container {
+    /* background-color: white; */
+    width: 60em;
+    margin: auto;
+}
+#header {
+    background-color: green;
+    color: white;
+    text-align: center;
+}
+#content {
+    padding: 1em;
+}
+#sidebar {
+    background-color: white;
+    width: 12em;
+    float: left;
+}
+#sidebar .selected {
+
+}
+#main {
+    background-color: white;
+    float: left;
+    width: 35em
+}
+#footer {
+    clear: both;
+}

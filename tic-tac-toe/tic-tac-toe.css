@@ -1,0 +1,32 @@
+html {
+    background-color: #5B3026;
+}
+
+.header {
+    text-align: center;
+    height: 100px;
+    background-color: #E0D2AF;
+}
+
+.main {
+    user-select: none;
+    text-align: center;
+}
+
+.footer {
+
+}
+
+table {
+    margin: 0 auto;
+    font-size: 40px;
+}
+
+td {
+    border: 5px solid black;
+    height: 3em;
+    width: 3em;
+    text-align: center;
+    /* background-color: yellow; */
+    background-color: #E0D2AF;
+}
