@@ -1,0 +1,42 @@
+html {
+    background-color: #5B3026;
+}
+
+.header {
+    text-align: center;
+    height: 100px;
+    background-color: #E0D2AF;
+}
+
+.main {
+    user-select: none;
+    text-align: center;
+    color: rgb(245, 242, 55);
+}
+
+.footer {
+
+}
+
+table {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0 auto;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    /* width: 50%; */
+    /* font-size: 1em; */
+}
+
+td {
+    font-size: 25px;
+    height: 1.2em;
+    width: 1.2em;
+    text-align: center;
+    background-color: chocolate;
+    /* background-color: #E0D2AF; */
+    /* visibility: hidden; */
+}
+
+td:hover {
+    background-color: #FCFEF4;
+}
