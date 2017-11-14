@@ -2,13 +2,13 @@ var tbody = document.querySelector('tbody');
 var table = document.querySelector('table');
 var h2    = document.querySelector('h2');
 var start = true
-var numColors = [null, 'blue', 'green', 'red', 'purple', 'darkred', 'white', 'white', 'white']
+var numColors = [null, 'blue', 'green', 'red', 'purple', 'darkred', '#007B7B', 'brown', 'grey']
 var mines      = 10;
 var boardRow   = 9;
 var boardCol   = 9;
 var board      = makeBoard(boardRow, boardCol);
 var gameOver   = false;
-var unrevealed = boardRow * boardCol;
+// var unrevealed = boardRow * boardCol;
 
 function Cell (row, column) {
     // this.position  = [row, column];
@@ -17,10 +17,51 @@ function Cell (row, column) {
     this.hasMine   = false;
     this.nearMine  = 0;
     this.revealed  = false;
-    this.flagged   = false;
+    // this.flagged   = false;
+    // this.qMarked   = false;
     this.locked    = false;
+    this.marked    = '';
     this.display   = '';
     this.htmlEl    = table.children[row].children[column];
+
+    this.reveal    = (arg) => {
+        this.htmlEl.innerText = this.display;
+        this.htmlEl.style.backgroundColor = '#E0D2AF';
+        this.revealed = true;
+
+        if (!this.nearMine && arg === 'recursive')  {
+            var neighbors = adjCells(this);
+            for (var i = 0; i < neighbors.length; i++) {
+                
+                if (!neighbors[i].revealed) {
+                    neighbors[i].reveal();
+                    if (!neighbors[i].nearMine) {
+                        neighbors[i].reveal('recursive');
+                    }
+                }
+            }
+        }
+    }
+
+    this.getNum   = () => {
+        this.nearMine = adjCells(this).filter(el => el.hasMine).length;
+
+        if (!this.hasMine && this.nearMine !== 0) {
+            this.htmlEl.style.color = numColors[this.nearMine];
+            this.display = this.nearMine;
+        }
+    }
+    this.setFlag  = () => {
+        // this.flagged = true;
+        this.marked  = '!';
+        this.htmlEl.innerText = this.marked;
+    }
+    this.removeIndicators = () => {
+        // this.questioned = false
+        // this.flagged = false
+        this.marked  = '';
+        this.htmlEl.innerText = this.marked;
+    }
 }
 
 function makeBoard(rows, columns) {
@@ -93,45 +134,20 @@ function setMines(event) {
 }
 
 function setNums() {
-    for (var r = 0; r < board.length; r++) {
-        for (var c = 0; c < board[r].length; c++) {
-            var cell = board[r][c];
-            cell.nearMine = adjCells(cell).filter(function(cell) {
-                return cell.hasMine;
-            }).length;
-
-            if (!cell.hasMine && cell.nearMine !== 0) {
-                cell.htmlEl.style.color = numColors[cell.nearMine];
-                cell.display = cell.nearMine;
-            }
-        }
-    }
+    board.forEach(row => {
+        row.forEach(cell => cell.getNum());
+    })
 }
 
 function reveal(cell, recursive) {
-    cell.htmlEl.style.backgroundColor = '#E0D2AF';
-    cell.htmlEl.innerText = cell.display;
-    cell.revealed = true;
-
-    if (!cell.nearMine && recursive === 'recursive')  {
-        var neighbors = adjCells(cell);
-        for (var i = 0; i < neighbors.length; i++) {
-            neighbors[i].htmlEl.style.backgroundColor = '#E0D2AF';
-            neighbors[i].htmlEl.innerText = neighbors[i].display;
-            // unrevealed--;
-            if (!neighbors[i].nearMine && 
-                !neighbors[i].revealed) {
-                    reveal(neighbors[i], 'recursive');
-            }
-        }
-    }
-}
-console.log(tbody);
-table.addEventListener('click', function (event) {
-    var cell;
-    if (gameOver) {
+    if (cell.revealed) {
         return
     }
+    cell.reveal();
+}
+
+table.addEventListener('click', (event) => {
+    var cell;
 
     for (var row = 0; row < board.length; row++) {
         var foundCell = board[row].filter(function (cell) {
@@ -144,30 +160,66 @@ table.addEventListener('click', function (event) {
         }
     }
 
+    if (cell.marked || gameOver) {
+        return;
+    }
+
     if (start) {
         lockCells(cell);
         setMines(event);
         setNums();
         start = false;
     }
-    reveal(cell, 'recursive')
+
+    //End game as loss if mine is clicked
     if (cell.hasMine) {
         gameOver = true;
-        console.log('test');
         for (var r = 0; r < board.length; r++) {
-            for (var c = 0; c < board[r].length; c++) {
-                if (board[r][c].hasMine) {
-                    reveal(board[r][c]);
-                }
-                
-            }
+            board[r].forEach(el => el.hasMine ? reveal(el):null)
+
         }
         cell.htmlEl.style.backgroundColor = 'red';
         h2.innerText = 'Game Over';
+    } else {
+        cell.reveal('recursive');
     }
+
+    let unrevealed = 0;
+    board.forEach(row => {
+        row.forEach(cell => cell.revealed ? null : unrevealed++)
+    })
+    
+    // reveal(cell, 'recursive');
+    //End game as victory if only cells left are mines
     console.log('Unrevealed cells: ' + unrevealed);
     if (unrevealed === mines) {
         gameOver = true;
         h2.innerHTML = 'Victory';
+        event.target.syle = 'none'
     }
 });
+
+table.addEventListener('contextmenu', event => {
+    event.preventDefault();
+    for (var row = 0; row < board.length; row++) {
+        var foundCell = board[row].filter(function (cell) {
+            console.log(cell.htmlEl === event.target);
+            return cell.htmlEl === event.target;
+        })[0];
+        if (foundCell) {
+            cell = foundCell;
+            break;
+        }
+    }
+    if (cell.revealed) {
+        return;
+    }
+    switch (cell.marked) {
+        case '':
+            cell.setFlag();
+            break;
+        case '!':
+            cell.removeIndicators()
+            break;
+    }
+})
