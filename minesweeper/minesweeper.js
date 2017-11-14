@@ -177,7 +177,7 @@ table.addEventListener('click', (event) => {
     }
 
     //End game as loss if mine is clicked
-    if (cell.hasMine) {
+    if (cell.hasMine && cell.marked !== '!') {
         gameOver = true;
         for (var r = 0; r < board.length; r++) {
             board[r].forEach(el => el.hasMine ? reveal(el):null)
