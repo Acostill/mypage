@@ -23,8 +23,6 @@ table {
     margin: 0 auto;
     margin-top: 2em;
     margin-bottom: 2em;
-    /* width: 50%; */
-    /* font-size: 1em; */
 }
 
 td {
@@ -33,10 +31,8 @@ td {
     width: 1.2em;
     text-align: center;
     background-color: chocolate;
-    /* background-color: #E0D2AF; */
-    /* visibility: hidden; */
 }
 
 td:hover {
-    background-color: #FCFEF4;
+    background-color: rgb(253, 169, 109);
 }

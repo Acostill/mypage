@@ -3,9 +3,9 @@ var table = document.querySelector('table');
 var h2    = document.querySelector('h2');
 var start = true
 var numColors = [null, 'blue', 'green', 'red', 'purple', 'darkred', '#007B7B', 'brown', 'grey']
-var mines      = 99;
-var boardRow   = 16;
-var boardCol   = 30;
+var mines      = 10;
+var boardRow   = 9;
+var boardCol   = 9;
 var board      = makeBoard(boardRow, boardCol);
 var gameOver   = false;
 // var unrevealed = boardRow * boardCol;
@@ -58,13 +58,14 @@ function Cell (row, column) {
     }
     this.setFlag  = () => {
         // this.flagged = true;
+        if (this.revealed) {
+            return;
+        }
         this.marked  = '!';
         this.htmlEl.innerText = this.marked;
         this.htmlEl.style.color = 'black';
     }
     this.removeIndicators = () => {
-        // this.questioned = false
-        // this.flagged = false
         this.marked  = '';
         this.htmlEl.innerText = this.marked;
         this.getNum();
@@ -152,7 +153,18 @@ function reveal(cell, recursive) {
     }
     cell.reveal();
 }
+function endGame(cell, str) {
+    gameOver = true;
+    if (str === 'loss') {
+        for (var r = 0; r < board.length; r++) {
+            board[r].forEach(el => el.hasMine ? reveal(el):null)
 
+        }
+        cell.htmlEl.style.backgroundColor = 'red';
+        h2.innerText = 'Game Over';        
+    }
+
+}
 table.addEventListener('click', (event) => {
     if (gameOver) {
         return
@@ -178,13 +190,7 @@ table.addEventListener('click', (event) => {
 
     //End game as loss if mine is clicked
     if (cell.hasMine && cell.marked !== '!') {
-        gameOver = true;
-        for (var r = 0; r < board.length; r++) {
-            board[r].forEach(el => el.hasMine ? reveal(el):null)
-
-        }
-        cell.htmlEl.style.backgroundColor = 'red';
-        h2.innerText = 'Game Over';
+        endGame(cell, 'loss');
     } else {
         cell.reveal('recursive');
     }
@@ -229,7 +235,13 @@ table.addEventListener('contextmenu', event => {
         var markedNeighbors = neighbors.filter(el => el.marked === '!');
 
         if (markedNeighbors.length === cell.nearMine) {
-            neighbors.forEach(el => el.reveal('recursive'));
+            neighbors.forEach(el => {
+                if (el.hasMine && el.marked !== '!') {
+                    endGame(el, 'loss');
+                    return;
+                }
+                el.reveal('recursive')
+            });
         }
     } else {
         switch (cell.marked) {
@@ -240,6 +252,23 @@ table.addEventListener('contextmenu', event => {
                 cell.removeIndicators()
                 break;
         }        
+    }
+    let unrevealed = 0;
+    board.forEach(row => {
+        row.forEach(cell => cell.revealed ? null : unrevealed++)
+    })
+    
+    //End game as victory if only cells left are mines
+    console.log('Unrevealed cells: ' + unrevealed);
+    if (unrevealed === mines) {
+        gameOver = true;
+        h2.innerHTML = 'Victory';
+
+        for (var r = 0; r < board.length; r++) {
+            board[r].forEach(el => el.hasMine ? el.setFlag():null)
+
+        }
+
     }
 
 })
