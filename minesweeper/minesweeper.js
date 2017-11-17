@@ -3,9 +3,9 @@ var table = document.querySelector('table');
 var h2    = document.querySelector('h2');
 var start = true
 var numColors = [null, 'blue', 'green', 'red', 'purple', 'darkred', '#007B7B', 'brown', 'grey']
-var mines      = 10;
-var boardRow   = 9;
-var boardCol   = 9;
+var mines      = 99;
+var boardRow   = 16;
+var boardCol   = 30;
 var board      = makeBoard(boardRow, boardCol);
 var gameOver   = false;
 // var unrevealed = boardRow * boardCol;
@@ -30,8 +30,8 @@ function Cell (row, column) {
             return;
         }
 
-        this.htmlEl.innerText = this.display;
-        this.htmlEl.style.backgroundColor = '#E0D2AF';
+        this.htmlEl.innerHTML = this.display;
+        this.htmlEl.style.backgroundColor = '#fff';
         this.revealed = true;
 
         if (!this.nearMine && arg === 'recursive')  {
@@ -61,13 +61,13 @@ function Cell (row, column) {
         if (this.revealed) {
             return;
         }
-        this.marked  = '!';
-        this.htmlEl.innerText = this.marked;
+        this.marked  = '&#x2691';
+        this.htmlEl.innerHTML = this.marked;
         this.htmlEl.style.color = 'black';
     }
     this.removeIndicators = () => {
         this.marked  = '';
-        this.htmlEl.innerText = this.marked;
+        this.htmlEl.innerHTML = this.marked;
         this.getNum();
     }
 }
@@ -161,7 +161,7 @@ function endGame(cell, str) {
 
         }
         cell.htmlEl.style.backgroundColor = 'red';
-        h2.innerText = 'Game Over';        
+        h2.innerHTML = 'Game Over';        
     }
 
 }
@@ -189,7 +189,7 @@ table.addEventListener('click', (event) => {
     }
 
     //End game as loss if mine is clicked
-    if (cell.hasMine && cell.marked !== '!') {
+    if (cell.hasMine && cell.marked !== '&#x2691') {
         endGame(cell, 'loss');
     } else {
         cell.reveal('recursive');
@@ -232,11 +232,11 @@ table.addEventListener('contextmenu', event => {
     }
     if (cell.revealed && cell.nearMine) {
         var neighbors = adjCells(cell);
-        var markedNeighbors = neighbors.filter(el => el.marked === '!');
+        var markedNeighbors = neighbors.filter(el => el.marked === '&#x2691');
 
         if (markedNeighbors.length === cell.nearMine) {
             neighbors.forEach(el => {
-                if (el.hasMine && el.marked !== '!') {
+                if (el.hasMine && el.marked !== '&#x2691') {
                     endGame(el, 'loss');
                     return;
                 }
@@ -248,7 +248,7 @@ table.addEventListener('contextmenu', event => {
             case '':
                 cell.setFlag();
                 break;
-            case '!':
+            case '&#x2691':
                 cell.removeIndicators()
                 break;
         }        
