@@ -1,8 +1,14 @@
 html {
     background-color: #fff;
-    color: #1b252f;
+    color: white;
+}
+body {
+    margin: 0 auto;
 }
 
+h1 {
+    margin: 0 auto;
+}
 .header {
     text-align: center;
     height: 100px;
