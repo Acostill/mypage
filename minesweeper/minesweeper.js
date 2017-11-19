@@ -63,7 +63,7 @@ function Cell (row, column) {
         }
         this.marked  = '&#x2691';
         this.htmlEl.innerHTML = this.marked;
-        this.htmlEl.style.color = 'black';
+        this.htmlEl.style.color = '#ded2b3';
     }
     this.removeIndicators = () => {
         this.marked  = '';
@@ -133,7 +133,7 @@ function setMines(event) {
             continue;
         }
 
-        cell.display = 'M';
+        cell.display = '&#x1F4A3';
         cell.htmlEl.style.color = 'black';
         cell.hasMine = true;
         cell.locked  = true;
