@@ -1,14 +1,18 @@
-var tbody = document.querySelector('tbody');
-var table = document.querySelector('table');
-var h2    = document.querySelector('h2');
-var start = true
-var numColors = [null, 'blue', 'green', 'red', 'purple', 'darkred', '#007B7B', 'brown', 'grey']
-var mines      = 99;
-var boardRow   = 16;
-var boardCol   = 30;
-var board      = makeBoard(boardRow, boardCol);
-var gameOver   = false;
-// var unrevealed = boardRow * boardCol;
+let tbody      = document.querySelector('tbody');
+let table      = document.querySelector('table');
+let gameStatus = document.querySelector('#game-status');
+let mineCount  = document.querySelector('#mine-count');
+let timer      = document.querySelector('#timer');
+let start      = true
+let numColors  = [null, 'blue', 'green', 'red', 'purple', 'darkred', '#007B7B', 'brown', 'grey']
+let mines      = 99;
+let boardRow   = 16;
+let boardCol   = 30;
+let board      = makeBoard(boardRow, boardCol);
+let gameTime;
+let gameOver   = false;
+mineCount.innerText = mines;
+timer.innerText = 0;
 
 function Cell (row, column) {
     // this.position  = [row, column];
@@ -35,8 +39,8 @@ function Cell (row, column) {
         this.revealed = true;
 
         if (!this.nearMine && arg === 'recursive')  {
-            var neighbors = adjCells(this);
-            for (var i = 0; i < neighbors.length; i++) {
+            let neighbors = adjCells(this);
+            for (let i = 0; i < neighbors.length; i++) {
                 
                 if (!neighbors[i].revealed) {
                     neighbors[i].reveal();
@@ -64,19 +68,21 @@ function Cell (row, column) {
         this.marked  = '&#x2691';
         this.htmlEl.innerHTML = this.marked;
         this.htmlEl.style.color = '#ded2b3';
+        mineCount.innerText = Number(mineCount.innerText) - 1;
     }
     this.removeIndicators = () => {
         this.marked  = '';
         this.htmlEl.innerHTML = this.marked;
         this.getNum();
+        mineCount.innerText = Number(mineCount.innerText) + 1;
     }
 }
 
 function makeBoard(rows, columns) {
-    var result = [];
-    for (var r = 0; r < rows; r++) {
-        var tr = document.createElement('tr');
-        for (var c = 0; c < columns; c++) {
+    let result = [];
+    for (let r = 0; r < rows; r++) {
+        let tr = document.createElement('tr');
+        for (let c = 0; c < columns; c++) {
             tr.appendChild(document.createElement('td'));
         }
         table.appendChild(tr);
@@ -84,9 +90,9 @@ function makeBoard(rows, columns) {
 
     tbody = table;
     console.log(tbody)
-    for (var r = 0; r < rows; r++) {
-        var boardRow = [];
-        for (var c = 0; c < columns; c++) {
+    for (let r = 0; r < rows; r++) {
+        let boardRow = [];
+        for (let c = 0; c < columns; c++) {
             boardRow.push(new Cell(r, c));
         }
         result.push(boardRow);
@@ -115,20 +121,20 @@ function adjCells(cell) {
 
 function lockCells(cell) {
     cell.locked = true;
-    var neighbors = adjCells(cell);
-    for (var i = 0; i < neighbors.length; i++) {
+    let neighbors = adjCells(cell);
+    for (let i = 0; i < neighbors.length; i++) {
         neighbors[i].locked = true;
     }
 }
 
 function setMines(event) {
-    var rows = board.length;
-    var columns = board[0].length;
-    var minesLeft = mines;
+    let rows = board.length;
+    let columns = board[0].length;
+    let minesLeft = mines;
     while (minesLeft > 0) {
-        var row = Math.floor(Math.random() * rows);
-        var column = Math.floor(Math.random() * columns);
-        var cell = board[row][column];
+        let row = Math.floor(Math.random() * rows);
+        let column = Math.floor(Math.random() * columns);
+        let cell = board[row][column];
         if (cell.locked) {
             continue;
         }
@@ -155,23 +161,32 @@ function reveal(cell, recursive) {
 }
 function endGame(cell, str) {
     gameOver = true;
+    clearInterval(gameTime);
     if (str === 'loss') {
-        for (var r = 0; r < board.length; r++) {
-            board[r].forEach(el => el.hasMine ? reveal(el):null)
+        for (let r = 0; r < board.length; r++) {
+            board[r].forEach(el => {
+                el.hasMine ? (reveal(el)) : null
+            })
 
         }
         cell.htmlEl.style.backgroundColor = 'red';
-        h2.innerHTML = 'Game Over';        
+        gameStatus.innerHTML = 'Game Over';        
     }
+    if (str === 'win') {
+        gameStatus.innerHTML = 'Victory';
 
+        for (let r = 0; r < board.length; r++) {
+            board[r].forEach(el => el.hasMine ? (!el.marked ? el.setFlag() : null) : null)
+        }
+    }
 }
 table.addEventListener('click', (event) => {
     if (gameOver) {
         return
     }
-    var cell;
-    for (var row = 0; row < board.length; row++) {
-        var foundCell = board[row].filter(function (cell) {
+    let cell;
+    for (let row = 0; row < board.length; row++) {
+        let foundCell = board[row].filter(function (cell) {
             console.log(cell.htmlEl === event.target);
             return cell.htmlEl === event.target;
         })[0];
@@ -185,6 +200,9 @@ table.addEventListener('click', (event) => {
         lockCells(cell);
         setMines(event);
         setNums();
+        gameTime = setInterval(function () {
+            timer.innerText = Number(timer.innerText) + 1;
+        }, 1000)
         start = false;
     }
 
@@ -203,14 +221,7 @@ table.addEventListener('click', (event) => {
     //End game as victory if only cells left are mines
     console.log('Unrevealed cells: ' + unrevealed);
     if (unrevealed === mines) {
-        gameOver = true;
-        h2.innerHTML = 'Victory';
-
-        for (var r = 0; r < board.length; r++) {
-            board[r].forEach(el => el.hasMine ? el.setFlag():null)
-
-        }
-
+        endGame(cell, 'win');
     }
 });
 
@@ -219,9 +230,9 @@ table.addEventListener('contextmenu', event => {
     if (gameOver) {
         return;
     }
-    var cell;
-    for (var row = 0; row < board.length; row++) {
-        var foundCell = board[row].filter(function (cell) {
+    let cell;
+    for (let row = 0; row < board.length; row++) {
+        let foundCell = board[row].filter(function (cell) {
             console.log(cell.htmlEl === event.target);
             return cell.htmlEl === event.target;
         })[0];
@@ -231,8 +242,8 @@ table.addEventListener('contextmenu', event => {
         }
     }
     if (cell.revealed && cell.nearMine) {
-        var neighbors = adjCells(cell);
-        var markedNeighbors = neighbors.filter(el => el.marked === '&#x2691');
+        let neighbors = adjCells(cell);
+        let markedNeighbors = neighbors.filter(el => el.marked === '&#x2691');
 
         if (markedNeighbors.length === cell.nearMine) {
             neighbors.forEach(el => {
@@ -261,14 +272,7 @@ table.addEventListener('contextmenu', event => {
     //End game as victory if only cells left are mines
     console.log('Unrevealed cells: ' + unrevealed);
     if (unrevealed === mines) {
-        gameOver = true;
-        h2.innerHTML = 'Victory';
-
-        for (var r = 0; r < board.length; r++) {
-            board[r].forEach(el => el.hasMine ? el.setFlag():null)
-
-        }
-
+        endGame(cell, 'win');
     }
 
 })

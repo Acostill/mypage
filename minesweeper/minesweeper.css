@@ -1,6 +1,6 @@
 html {
     background-color: #fff;
-    color: white;
+    color: #80475e;
 }
 body {
     margin: 0 auto;
@@ -9,10 +9,16 @@ body {
 h1 {
     margin: 0 auto;
 }
+
+pre {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+}
 .header {
     text-align: center;
     height: 100px;
-    background-color: #4f6272;
+    /* background-color: #4f6272; */
 }
 
 .main {
@@ -28,8 +34,6 @@ h1 {
 table {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0 auto;
-    margin-top: 2em;
-    margin-bottom: 2em;
     border: 3px solid #ded2b3;
 }
 
